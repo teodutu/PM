@@ -26,7 +26,8 @@ int frecventa_nota[NUM_NOTE] =
 };
 
 /* Aprinde led-ul PC0 la apasarea butonului PB2. */
-void exemplu(void) {
+void exemplu(void)
+{
     /* Setez pinul PB2 ca intrare. */
     DDRB &= ~(1 << PB2);
 
@@ -39,7 +40,8 @@ void exemplu(void) {
     /* Sting LED-ul. */
     PORTC &= ~(1 << PC0);
 
-    while (1) {
+    while (1)
+    {
         /* Daca butonul este apasat. */
         if ((PINB & (1 << PB2)) == 0)
             /* Aprind LED-ul. */
@@ -65,23 +67,33 @@ void task1(void)
     PORTD |=        _BV(PD6);
     PORTC &=        ~_BV(PC0);
 
-    int8_t pin      = 1;
+    int8_t pin      = 0;
+    int8_t old_pin  = 1;
     int8_t state    = SHIFT_LEFT;
 
     while(1)
     {
         /* TODO1: Citire butoane PB2 si PD6. */
         /* TODO1: Generare secvente. */
+        PORTC &= ~_BV(old_pin);
         PORTC |= _BV(pin);
+
+        old_pin = pin;
 
         if (!(PINB & _BV(PB2)))
         {
-            pin <<= 1;
-
-            if (pin == 0)
+            if (!(PIND & _BV(PD6)))
             {
-                pin = 1;
-            }
+                PORTC = 0xFF;
+            } else
+            {
+                pin <<= 1;
+
+                if (pin == 0)
+                {
+                    pin = 1;
+                }
+            }            
         } else if (!(PIND & _BV(PD6)))
         {   
             if (state == SHIFT_LEFT)
@@ -117,6 +129,16 @@ void speaker_morse(int tip_morse)
      * TODO2: Alternarea starii pinului PD4 la interval de o milisecunda.
      * Atentie la tipul de ton folosit (tip_morse).
      */
+    PORTD |= _BV(PD4);
+
+    int8_t i;
+
+    for (i = 0; i != tip_morse; ++i)
+    {
+        _delay_ms(1);
+    }
+
+    PORTD &= ~_BV(PD4);
 }
 
 /*
@@ -126,10 +148,26 @@ void speaker_morse(int tip_morse)
 void task2(void)
 {
     /* TODO2: Setare directii porturi folosite. */
+    DDRD |= _BV(PD4);
+    DDRD &= ~_BV(PD6);
+    DDRB &= ~_BV(PB2);
+
+    PORTD &= ~_BV(PD4);
+    PORTD |= _BV(PD6);
+    PORTB |= _BV(PB2);
 
     while (1)
     {
         /* TODO2: Generare cod morse pentru PB2 si PD6. */
+        if(!(PINB & _BV(PB2)))
+        {
+            speaker_morse(MORSE_SCURT);
+        } else if (!(PIND & _BV(PD6)))
+        {
+            speaker_morse(MORSE_LUNG);
+        }
+
+        _delay_ms(MORSE_PAUZA);
     }
 }
 
@@ -173,11 +211,9 @@ void task3(void)
     int nota_curenta = -1;
 
     /* TODO3: Setare directii porturi folosite. */
-
     while (1)
     {
         /* TODO3: Verificare butoane. */
-
         if (nota_curenta != -1)
         {
             /* Aprindem LED-ul corespunzator. */
