@@ -26,7 +26,7 @@
 #define VARIABLE_DELAY(iter, time, delay)               \
     do                                                  \
     {                                                   \
-        for (iter = 0, iter != (time), ++iter)          \
+        for (iter = 0; iter != (time); ++iter)          \
         {                                               \
             delay(1);                                   \
         }                                               \
@@ -174,8 +174,6 @@ void task2(void)
         _delay_ms(MORSE_PAUZA);
     }
 }
-
-void
 
 /* Genereaza o nota folosind speaker-ul. */
 void speaker_reda(int nota)
