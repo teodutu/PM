@@ -11,14 +11,26 @@
 #define DELAY_SECVENTA  (250)
 #define NUM_SECVENTE    (6)
 
+#define ONE_SEC_US      (1000000)
+
 #define MORSE_LUNG      (150)
 #define MORSE_SCURT     (50)
 #define MORSE_PAUZA     (50)
 
 #define NUM_NOTE        (8)
+#define MAX_NOTE        (NUM_NOTE - 1)
 
 #define SHIFT_RIGHT     (1)
 #define SHIFT_LEFT      (0)
+
+#define VARIABLE_DELAY(iter, time, delay)               \
+    do                                                  \
+    {                                                   \
+        for (iter = 0, iter != (time), ++iter)          \
+        {                                               \
+            delay(1);                                   \
+        }                                               \
+    } while(0)
 
 int frecventa_nota[NUM_NOTE] =
 {
@@ -59,26 +71,22 @@ void exemplu(void)
 void task1(void)
 {
     /* TODO1: Setare directii porturi folosite. */
-    DDRB &=         ~_BV(PB2);
-    DDRD &=         ~_BV(PD6);
-    DDRA |=         _BV(PA0);
+    DDRB &= ~_BV(PB2);
+    DDRD &= ~_BV(PD6);
+    DDRA |= _BV(PA0);
 
-    PORTB |=        _BV(PB2);
-    PORTD |=        _BV(PD6);
-    PORTC &=        ~_BV(PC0);
+    PORTB |= _BV(PB2);
+    PORTD |= _BV(PD6);
+    PORTC &= ~_BV(PC0);
 
     int8_t pin      = 0;
-    int8_t old_pin  = 1;
     int8_t state    = SHIFT_LEFT;
 
     while(1)
     {
         /* TODO1: Citire butoane PB2 si PD6. */
         /* TODO1: Generare secvente. */
-        PORTC &= ~_BV(old_pin);
-        PORTC |= _BV(pin);
-
-        old_pin = pin;
+        PORTC = _BV(pin);
 
         if (!(PINB & _BV(PB2)))
         {
@@ -132,11 +140,7 @@ void speaker_morse(int tip_morse)
     PORTD |= _BV(PD4);
 
     int8_t i;
-
-    for (i = 0; i != tip_morse; ++i)
-    {
-        _delay_ms(1);
-    }
+    VARIABLE_DELAY(i, tip_morse, _delay_ms);
 
     PORTD &= ~_BV(PD4);
 }
@@ -171,15 +175,17 @@ void task2(void)
     }
 }
 
+void
+
 /* Genereaza o nota folosind speaker-ul. */
 void speaker_reda(int nota)
 {
     int i;
-
     /*
      * TODO3: Calculati perioada notei in functie de frecventa, in
      * microsecunde.
      */
+    int half_period = ONE_SEC_US / (2 * frecventa_nota[nota]);
 
     /*
      * TODO3: Generati un ton corespunzator notei.
@@ -188,18 +194,25 @@ void speaker_reda(int nota)
      * perioada speaker-ul sa fie pornit, iar jumatate din perioada sa fie
      * oprit.
      */
+    PORTD |= _BV(PD4);
+    VARIABLE_DELAY(i, half_period, _delay_us);
+
+    PORTD &= ~_BV(PD4);
+    VARIABLE_DELAY(i, half_period, _delay_us);
 }
 
 /* Aprinde LED-ul corespunzator notei alese. */
 void led_aprinde(int nota)
 {
     /* TODO3: Aprinde LED-ul corespunzator. */
+    PORTC = _BV(nota);
 }
 
 /* Stinge LED-urile. */
 void led_stinge(void)
 {
     /* TODO3: Stinge LED-urile. */
+    PORTC = 0;
 }
 
 /*
@@ -208,12 +221,56 @@ void led_stinge(void)
  */
 void task3(void)
 {
-    int nota_curenta = -1;
+    int8_t pressed_B = 0;
+    int8_t pressed_D = 0;
+    int8_t nota_curenta = -1;
 
     /* TODO3: Setare directii porturi folosite. */
+    DDRB &= ~_BV(PB2);
+    DDRD &= ~_BV(PD6);
+    DDRD |= ~_BV(PD4);
+    DDRC = 0xff;
+
+    PORTB |= _BV(PB2);
+    PORTD |= _BV(PD6);
+    PORTD &= ~_BV(PD4);
+    led_stinge();
+
     while (1)
     {
         /* TODO3: Verificare butoane. */
+        if (!(PINB & _BV(PB2)))
+        {
+            if (!pressed_B)
+            {
+                pressed_B = 1;
+
+                if (nota_curenta != MAX_NOTE)
+                {
+                    ++nota_curenta;
+                }
+            }
+        } else
+        {
+            pressed_B = 0;
+        } 
+
+        if (!(PIND & _BV(PD6)))
+        {
+            if (!pressed_D)
+            {
+                pressed_D = 1;
+
+                if (nota_curenta != -1)
+                {
+                    --nota_curenta;
+                }
+            }
+        } else
+        {
+            pressed_D = 0;
+        }
+
         if (nota_curenta != -1)
         {
             /* Aprindem LED-ul corespunzator. */
