@@ -11,7 +11,7 @@
 #define DELAY_SECVENTA  (250)
 #define NUM_SECVENTE    (6)
 
-#define ONE_SEC_US      (1000000)
+#define ONE_SEC_US      (1000000l)
 
 #define MORSE_LUNG      (150)
 #define MORSE_SCURT     (50)
@@ -47,20 +47,25 @@ void exemplu(void)
     PORTB |= (1 << PB2);
 
     /* Setez pinul PC0 ca iesire. */
-    DDRC |= (1 << PC0);
+    DDRC = 0XFF;
 
     /* Sting LED-ul. */
+    PORTC = 0;
     PORTC &= ~(1 << PC0);
 
     while (1)
     {
         /* Daca butonul este apasat. */
         if ((PINB & (1 << PB2)) == 0)
+        {
             /* Aprind LED-ul. */
             PORTC |= (1 << PC0);
+        }
         else
+        {
             /* Sting LED-ul. */
             PORTC &= ~(1 << PC0);
+        }
     }
 }
 
@@ -73,11 +78,12 @@ void task1(void)
     /* TODO1: Setare directii porturi folosite. */
     DDRB &= ~_BV(PB2);
     DDRD &= ~_BV(PD6);
-    DDRA |= _BV(PA0);
+    DDRC = 0xFF;
+
+    PORTC = 0;
 
     PORTB |= _BV(PB2);
     PORTD |= _BV(PD6);
-    PORTC &= ~_BV(PC0);
 
     int8_t pin      = 0;
     int8_t state    = SHIFT_LEFT;
@@ -95,34 +101,29 @@ void task1(void)
                 PORTC = 0xFF;
             } else
             {
-                pin <<= 1;
+                pin += 1;
 
-                if (pin == 0)
+                if (pin == 8)
                 {
-                    pin = 1;
+                    pin = 0;
                 }
             }            
         } else if (!(PIND & _BV(PD6)))
         {   
             if (state == SHIFT_LEFT)
             {
-                pin <<= 1;
+                pin += 1;
             } else
             {
-                pin >>= 1;
+                pin -= 1;
             }
 
             if (pin == 0)
             {
-                if (state == SHIFT_LEFT)
-                {
-                    pin = 0x80;
-                } else
-                {
-                    pin = 1;
-                }
-
-                state ^= 1;
+                state = SHIFT_LEFT;
+            } else if (pin == 7)
+            {
+                state = SHIFT_RIGHT;
             }
         }
 
@@ -139,8 +140,12 @@ void speaker_morse(int tip_morse)
      */
     PORTD |= _BV(PD4);
 
-    int8_t i;
-    VARIABLE_DELAY(i, tip_morse, _delay_ms);
+    int i;
+    for (i = 0; i != tip_morse; ++i)
+    {
+        PORTD ^= _BV(PD4);
+        _delay_ms(1);
+    }
 
     PORTD &= ~_BV(PD4);
 }
@@ -176,74 +181,60 @@ void task2(void)
 }
 
 /* Genereaza o nota folosind speaker-ul. */
-void speaker_reda(int nota)
-{
+void speaker_reda(int nota) {
+    int half_period = ONE_SEC_US / frecventa_nota[nota] / 2;
     int i;
-    /*
-     * TODO3: Calculati perioada notei in functie de frecventa, in
-     * microsecunde.
-     */
-    int half_period = ONE_SEC_US / (2 * frecventa_nota[nota]);
 
     /*
-     * TODO3: Generati un ton corespunzator notei.
-     *
-     * Pentru a genera un ton cu o anumita perioada trebuie ca jumatate din
-     * perioada speaker-ul sa fie pornit, iar jumatate din perioada sa fie
-     * oprit.
+     * Nu putem folosi variable ca argument pentru functia
+     * _delay_us(), asa ca folosim acest "workaround".
      */
-    PORTD |= _BV(PD4);
+    PORTD |= (1 << PD4);
     VARIABLE_DELAY(i, half_period, _delay_us);
 
-    PORTD &= ~_BV(PD4);
+    PORTD &= ~(1 << PD4);
     VARIABLE_DELAY(i, half_period, _delay_us);
 }
 
 /* Aprinde LED-ul corespunzator notei alese. */
-void led_aprinde(int nota)
-{
-    /* TODO3: Aprinde LED-ul corespunzator. */
+void led_aprinde(int nota) {
     PORTC = _BV(nota);
 }
 
 /* Stinge LED-urile. */
-void led_stinge(void)
-{
-    /* TODO3: Stinge LED-urile. */
-    PORTC = 0;
+void led_stinge(void) {
+    PORTC = 0x00;
 }
 
 /*
  * Genereaza note folosind speaker-ul. Nota generata este aleasa folosind
  * butoanele PB2 si PD6.
  */
-void task3(void)
-{
-    int8_t pressed_B = 0;
-    int8_t pressed_D = 0;
-    int8_t nota_curenta = -1;
+void task3(void) {
+    int pressed_B = 0;
+    int pressed_D = 0;
+    int nota_curenta = -1;
 
-    /* TODO3: Setare directii porturi folosite. */
     DDRB &= ~_BV(PB2);
     DDRD &= ~_BV(PD6);
-    DDRD |= ~_BV(PD4);
-    DDRC = 0xff;
+    DDRD |= _BV(PD4);
+    DDRC = 0xFF;
 
     PORTB |= _BV(PB2);
     PORTD |= _BV(PD6);
+    PORTC = 0x00;
+
     PORTD &= ~_BV(PD4);
-    led_stinge();
 
     while (1)
     {
-        /* TODO3: Verificare butoane. */
         if (!(PINB & _BV(PB2)))
         {
             if (!pressed_B)
             {
                 pressed_B = 1;
 
-                if (nota_curenta != MAX_NOTE)
+                if (nota_curenta < MAX_NOTE)
                 {
                     ++nota_curenta;
                 }
@@ -251,7 +242,7 @@ void task3(void)
         } else
         {
             pressed_B = 0;
-        } 
+        }
 
         if (!(PIND & _BV(PD6)))
         {
@@ -259,7 +250,7 @@ void task3(void)
             {
                 pressed_D = 1;
 
-                if (nota_curenta != -1)
+                if (nota_curenta > -1)
                 {
                     --nota_curenta;
                 }
@@ -286,10 +277,10 @@ void task3(void)
 
 int main(void)
 {
-    exemplu();
-    /*task1();*/
-    /*task2();*/
-    /*task3();*/
+    //exemplu();
+    // task1();
+    // task2();
+    task3();
 
     return 0;
 }

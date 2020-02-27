@@ -11,7 +11,7 @@ lab0.elf: lab0.c
 	avr-g++ -mmcu=atmega324p -DF_CPU=12000000 -Os -Wall -o $@ $^
 
 upload: lab0.hex
-	avrdude -c arduino -P $(PORT) -b 57600 -p atmega324p -U flash:w:$<:a
+	sudo avrdude -c arduino -P $(PORT) -b 57600 -p atmega324p -U flash:w:$<:a
 
 clean:
 	rm -rf lab0.elf lab0.hex
