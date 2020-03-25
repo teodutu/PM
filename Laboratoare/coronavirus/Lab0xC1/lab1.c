@@ -67,7 +67,7 @@ void timer1_init()
 	// initialize the timer counter
 	TCNT1 = 0;
 	// configure the threshold
-	OCR1A = 10000;
+	OCR1A = 12000000 / 256;
 	// enable compare interrupt A
 	TIMSK1 = _BV(OCIE1A);
 	// configure mode of operation e.g. CTC with OCR1A
@@ -100,12 +100,12 @@ int main(void)
 		PORTA = _BV(PA7) | digit_pattern[counter / 10];
 		PORTC = 0;
 
-		_delay_ms(5);
+		_delay_ms(100);
 
 		PORTC |= _BV(PC2);
 		PORTA = digit_pattern[counter % 10];
 
-		_delay_ms(5);
+		_delay_ms(100);
 	}
 
 	return 0;
