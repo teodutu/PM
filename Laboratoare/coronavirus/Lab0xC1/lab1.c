@@ -61,6 +61,9 @@ void IO_init()
 	DDRD |= _BV(PD4);
 	PORTD &= ~_BV(PD4);
 
+	DDRD &= ~_BV(PD3);
+	PORTD |= ~_BV(PD3);
+
 	DDRD |= _BV(PD2);
 	PORTD &= ~_BV(PD2);
 
