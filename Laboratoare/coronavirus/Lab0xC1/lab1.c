@@ -47,6 +47,11 @@ ISR(PCINT3_vect)
     {
         PORTD ^= _BV(PD4);
 		increase ^= 1;
+
+		if (increase == 0)
+		{
+			counter = 0;
+		}
     }
 }
 
