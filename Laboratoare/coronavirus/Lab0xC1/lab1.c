@@ -26,13 +26,18 @@ const uint8_t digit_pattern[16] =
 		0b01110001  // F
 };
 
-volatile uint8_t counter = 0;
+volatile uint8_t counter;
+volatile uint8_t increase;
 
 /* Timer1 Output Compare Interrupt A */
 ISR(TIMER1_COMPA_vect)
 {
 	PORTD ^= _BV(PD2);
-    counter = (counter + 1) % 100;
+
+	if (increase)
+	{
+		counter = (counter + 1) % 100;
+	}
 }
 
 /* pin change interrupt on PORTD */
@@ -41,6 +46,7 @@ ISR(PCINT3_vect)
 	if (!(PIND & _BV(PD3)))
     {
         PORTD ^= _BV(PD4);
+		increase ^= 1;
     }
 }
 
