@@ -40,17 +40,23 @@ void timer1_init()
 }
 
 //we will modify this variable when PB2 is pressed
-volatile char pb2_pressed=0;
+volatile char pb2_pressed = 0;
 
 ISR(INT2_vect)
 {
-	pb2_pressed=1;
+	pb2_pressed = 1;
 	PORTD ^= _BV(PD4);
 }
 
 ISR(INT0_vect)
 {
-	// ???
+	if ((PIND & _BV(PD3)))
+	{
+		USART0_print("Clockwise rotation\r\n");
+	} else
+	{
+		USART0_print("Trigonomteric rotation\r\n");
+	}
 }
 
 void int2_init()
@@ -61,28 +67,27 @@ void int2_init()
 
 void int0_init()
 {
-	EICRA|=_BV(ISC01);
-	EICRA|=_BV(ISC00);
-	EIMSK|=_BV(INT0);
+	EICRA |= _BV(ISC01) | _BV(ISC00);
+	EIMSK |= _BV(INT0);
 }
 
 int main(void)
 {
 	timer1_init();	//initialize the timer
 	int2_init();	//initialize interrupt for int2
-	//int0_init();
+	int0_init();
 	sei();
 	USART0_init();
 	DDRB  &= ~_BV(PB2);
 	PORTB |= _BV(PB2);
 	
 	/* Set PD4 as output */
-	DDRD = _BV(PD4) | _BV(PD5) ;
+	DDRD = _BV(PD4) | _BV(PD5);
 	PORTD &= ~_BV(PD4);
 
 	while (1) 
 	{
-		if(pb2_pressed)
+		if (pb2_pressed)
 		{
 			USART0_print("Hello there\r\n");
 			USART0_print("Motor changed direction\r\n");
