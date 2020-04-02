@@ -16,6 +16,7 @@ void timer1_init()
 
 	/* Init counter register */
 	TCNT1 = 0;
+
 	/* Init top register OCR1A 
 	 * for an interrupt frequency
 	 * of 10k HZ
@@ -45,8 +46,8 @@ ISR(INT0_vect)
 
 void int2_init()
 {
-	EICRA|=_BV(ISC21); //the interrupt will be generated on a falling edge of PB2
-	EIMSK|=_BV(INT2);
+	EICRA |= _BV(ISC21);  //the interrupt will be generated on a falling edge of PB2
+	EIMSK |= _BV(INT2);
 }
 
 void int0_init()
@@ -64,7 +65,7 @@ int main(void)
 	USART0_init();
 	DDRB  &= ~_BV(PB2);
 	PORTB |= _BV(PB2);
-	
+
 	/* Set PD4 as output */
 	DDRD = _BV(PD4) | _BV(PD5);
 	PORTD &= ~_BV(PD4);
@@ -79,7 +80,7 @@ int main(void)
 			pb2_pressed=0;
 		}
 
-		_delay_ms(100);  // in lab scrie 2s, dar dura prea mult
+		_delay_ms(100);  // in lab scrie 2s, dar dura prea mult...
 		OCR1A += 25;
 		OCR1A = (OCR1A > 255) ? 3 : OCR1A;  // 255 / 100 = 2.55
 	}
