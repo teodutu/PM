@@ -35,7 +35,7 @@ ISR(INT2_vect)
 
 ISR(INT0_vect)
 {
-	if ((PIND & _BV(PD3)))
+	if (PIND & _BV(PD3))
 	{
 		USART0_print("Clockwise rotation\r\n");
 	} else
