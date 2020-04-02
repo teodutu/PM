@@ -6,29 +6,13 @@
 #include <string.h>
 #include "usart.h"
 
-ISR(TIMER1_COMPA_vect)
-{
-	/* Set pin high */
-	PORTD |= _BV(PD5);
-}
-
-ISR(TIMER1_COMPB_vect)
-{
-	/* Set pin low */
-	PORTD &= ~_BV(PD5);
-}
-
 void timer1_init()
 {
-    TIMSK1 |= _BV(OCIE1A);
-	/* Activate interrupt compare with OCR1B */
-	TIMSK1 |= _BV(OCIE1B);
 	// Fast PWM with top at OCR1A
-	TCCR1B |= _BV(WGM12);
+	// Prescaler 8
+	TCCR1B |= _BV(WGM12) | _BV(CS11);
 	// Fast PWM
 	TCCR1A |= _BV(WGM10) | _BV(COM1A1); 
-	// Prescaler 8
-	TCCR1B |= _BV(CS11);
 
 	/* Init counter register */
 	TCNT1 = 0;
@@ -36,7 +20,7 @@ void timer1_init()
 	 * for an interrupt frequency
 	 * of 10k HZ
 	 */
-	OCR1A = 3;
+	OCR1A = 3;  // 255 / 100 = 2.55
 }
 
 //we will modify this variable when PB2 is pressed
@@ -95,9 +79,9 @@ int main(void)
 			pb2_pressed=0;
 		}
 
-		_delay_ms(100);
+		_delay_ms(100);  // in lab scrie 2s, dar dura prea mult
 		OCR1A += 25;
-		OCR1A = (OCR1A > 255) ? 3 : OCR1A;
+		OCR1A = (OCR1A > 255) ? 3 : OCR1A;  // 255 / 100 = 2.55
 	}
 
 	return 0;
