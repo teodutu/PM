@@ -67,9 +67,17 @@ void ADC_init()
 
 void TIMER0_init(void)
 {
-	OCR0A = 164;
-	TCCR0A = _BV(WGM00);
-	TCCR0B = _BV(CS00) | _BV(CS01);
+	/*
+	 * f_timer = f_CPU / (2 * prescaler * (OCR0A + 1))
+	 * OCR0A + 1 = 234
+	 * f_CPU = 12MHz
+	 * prescaler = 256
+	 * => f_timer = 12 * 10^6 / (2 * 256 * 234) ~= 100Hz
+	 * => T ~= 0.01s = 10ms
+	 */
+	OCR0A = 233;
+	TCCR0A = _BV(WGM02);  /* CTC */
+	TCCR0B = _BV(CS02);  /* prescaler 1/256 */
 
 	TCNT0 = 0;
 }
