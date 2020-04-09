@@ -17,12 +17,13 @@ ISR(ADC_vect)
 {
 	/* TODO 2: Read ADC value */
 	ADC_value = ADC;
-	
+
 	/* TODO 2: Start another conversion */
 	ADCSRA |= _BV(ADSC);
 
 	/* TODO 3: Clear output compare match flag A */
-	/* ??? */
+	/* Comportamentul e acelasi si cu si fara asta, deci cred ca nu e nevoie */
+	/* TIFR0 = _BV(OCF0A); */
 }
 
 void ADC_init()
@@ -41,14 +42,13 @@ void ADC_init()
 
 	/* AVCC with external capacitor at AREF pin */
 	ADMUX |= (1 << REFS0);
-	
-	ADCSRA = 0;
+
 	/* set prescaler at 128 */
-	ADCSRA |= (7 << ADPS0);
+	ADCSRA = (7 << ADPS0);
 
 	/* TODO 3: Enable auto trigger */
 	ADCSRA |= _BV(ADATE);
-	
+
 	/* TODO 3: Timer0 compare match A */
 	ADCSRB = _BV(ADTS0) | _BV(ADTS1);
 
@@ -132,7 +132,7 @@ int main(void)
 
 	/* TODO2: Enable global interrupts */
 	sei();
-	
+
 	while (1)
 	{
 		if (task_num == 1)
@@ -145,7 +145,6 @@ int main(void)
 		{
 			task3();
 		}
-		
 	}
 
 	return 0;
