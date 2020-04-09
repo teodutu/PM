@@ -90,10 +90,10 @@ void task1()
 
 	volts = ADC * ADC_AREF_VOLTAGE / ADC_MAX_LEVEL;
 
+	ADCSRA |= _BV(ADSC);
+
 	sprintf(buffer, "Read %.3fV from PA1\r\n", volts);
 	USART0_print(buffer);
-
-	ADCSRA |= _BV(ADSC);
 }
 
 void task2()
