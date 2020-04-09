@@ -9,4 +9,4 @@ lab3.elf: lab3.c usart.c
 	avr-g++ -mmcu=atmega324p -DF_CPU=12000000 -Os -Wall $(FLAGS) -o $@ $^
 
 clean:
-	rm -rf lab3.elf lab3.hex
+	rm -rf lab3.elf lab3.hex *.PWI *.SDF
