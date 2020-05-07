@@ -11,4 +11,6 @@ Proiectare cu Microprocesoare - UPB 2020
 - **Lab0xC2:** intreruperi externe, _PWM_, punte _H_ (si _Proteus_ da crash...)
 - **Lab0xC3:** ADC (+ timere)
 - **Lab0xC4:** Debugging (un gunoi)
+- **Lab0xC5:** Protocolul _SPI_
+- **Lab0xC6:** Protocolul _I2C_
 
