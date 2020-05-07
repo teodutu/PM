@@ -16,6 +16,7 @@ void step1( void){
 
   	// TODO - send start
 	I2C_start();
+
 	// TODO - send the header and the transmit bit (0) - return the status in the ack variable
 	ack = I2C_write(0xA0);
 
@@ -37,12 +38,13 @@ void step2( void){
 	{
 	  	// TODO - send start
 		I2C_start();
-	    
-		if (!I2C_write(0xA0 | (i << 1)))
+		
+		if (I2C_write(0xA0 | (i << 1)))
 		{
 			snprintf(buffer, sizeof(buffer), "    Found slave at address 0x%2X\r\n", i);
 			USART0_print(buffer);
 		}
+
 		// TODO - send stop
 		I2C_stop();
 	}
